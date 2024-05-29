@@ -13,32 +13,41 @@ account = dict(client.get_account())
 for k,v in account.items():
     print(f"{k:30}{v}")
 
+buy_price = None  # define buy_price as a global variable
+
 # async handler
 async def trade_data_handler(data):
+    global buy_price  # declare buy_price as global inside the function
     # trade data will arrive here
     current_price = data.price
-    if current_price - buy_price >= 0.05:
+    print(f"Received trade data: {data}")  # print the received trade data
+    print(f"Current price: {current_price}, Buy price: {buy_price}, Difference: {current_price - buy_price}")  # print the prices
+    if current_price - buy_price >= 0.03:
+        print("Condition for selling met, placing sell order...")  # print a message before placing the sell order
         sell_order_details = MarketOrderRequest(
             symbol= "SPY",
-            qty = 3,
+            qty = 20,
             side = OrderSide.SELL,
             time_in_force = TimeInForce.DAY
         )
-        sell_order = client.submit_order(order_data= sell_order_details)
+        try:
+            sell_order = client.submit_order(order_data= sell_order_details)
+            print(f"Sell order placed: {sell_order}")  # print the placed sell order
+        except Exception as e:
+            print(f"Error when placing sell order: {e}")  # print any errors when placing the sell order
 
 wss_client.subscribe_trades(trade_data_handler, "SPY")
 
 while True:  # loop to continuously buy and sell
     order_details = MarketOrderRequest(
         symbol= "SPY",
-        qty = 50,
+        qty = 20,
         side = OrderSide.BUY,
         time_in_force = TimeInForce.DAY
     )
 
     order = client.submit_order(order_data= order_details)
 
-    buy_price = None
     while True:
         time.sleep(1)  # sleep for a second to prevent excessive API calls
         order_status = client.get_order_by_id(order.id)

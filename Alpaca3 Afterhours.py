@@ -4,8 +4,8 @@ from alpaca.trading.requests import MarketOrderRequest
 import time
 
 # Your Alpaca API credentials
-API_KEY = "PK32U99CA3S0PK6OLCO2"
-SECRET_KEY = "dxj7ykWQHFPD6Tec3ysBfeil5F792JlqMW5ZT8gq"
+API_KEY = "PKJ527O543PYLRFFCQ9U"
+SECRET_KEY = "3h3FnRo1t1VT3lIPihQrOZ1K0IjjewTe1Y6Nnbz8"
 
 
 # Trading parameters

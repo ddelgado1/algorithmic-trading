@@ -13,14 +13,17 @@ account = dict(client.get_account())
 for k,v in account.items():
     print(f"{k:30}{v}")
 
+buy_price = None  # define buy_price as a global variable
+
 # async handler
 async def trade_data_handler(data):
+    global buy_price  # declare buy_price as global inside the function
     # trade data will arrive here
     current_price = data.price
     if current_price - buy_price >= 0.05:
         sell_order_details = MarketOrderRequest(
             symbol= "SPY",
-            qty = 3,
+            qty = 40,
             side = OrderSide.SELL,
             time_in_force = TimeInForce.DAY
         )
@@ -31,14 +34,13 @@ wss_client.subscribe_trades(trade_data_handler, "SPY")
 while True:  # loop to continuously buy and sell
     order_details = MarketOrderRequest(
         symbol= "SPY",
-        qty = 50,
+        qty = 40,
         side = OrderSide.BUY,
         time_in_force = TimeInForce.DAY
     )
 
     order = client.submit_order(order_data= order_details)
 
-    buy_price = None
     while True:
         time.sleep(1)  # sleep for a second to prevent excessive API calls
         order_status = client.get_order_by_id(order.id)
