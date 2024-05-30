@@ -34,3 +34,4 @@ for position in positions:
     print(f"{position[0]:9}{position[1]:>4}{float(position[1]) * float(position[2]):>15.2f}")
 
 client.close_all_positions(cancel_orders=True)
+
