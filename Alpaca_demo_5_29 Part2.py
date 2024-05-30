@@ -1,6 +1,6 @@
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import OrderSide, TimeInForce
-from alpaca.trading.requests import MarketOrderRequest
+from alpaca.trading.requests import MarketOrderRequest, StopOrderRequest
 from alpaca.data.live import StockDataStream
 import config
 import time
@@ -22,21 +22,6 @@ async def trade_data_handler(data):
     current_price = data.price
     print(f"Received trade data: {data}")  # print the received trade data
     print(f"Current price: {current_price}, Buy price: {buy_price}, Difference: {current_price - buy_price}")  # print the prices
-    if current_price - buy_price >= 0.03:
-        print("Condition for selling met, placing sell order...")  # print a message before placing the sell order
-        sell_order_details = MarketOrderRequest(
-            symbol= "SPY",
-            qty = 2,
-            side = OrderSide.SELL,
-            time_in_force = TimeInForce.DAY
-        )
-        try:
-            sell_order = client.submit_order(order_data= sell_order_details)
-            print(f"Sell order placed: {sell_order}")  # print the placed sell order
-        except Exception as e:
-            print(f"Error when placing sell order: {e}")  # print any errors when placing the sell order
-
-wss_client.subscribe_trades(trade_data_handler, "SPY")
 
 while True:  # loop to continuously buy and sell
     order_details = MarketOrderRequest(
@@ -55,9 +40,22 @@ while True:  # loop to continuously buy and sell
             buy_price = float(order_status.filled_avg_price)  # convert to float
             break  # exit the loop once the buy order is filled
 
-    time.sleep(60)  # wait for a minute before the next buy order
+    # Place a stop loss order
+    stop_loss_order_details = StopOrderRequest(
+        symbol="SPY",
+        qty=2,
+        side=OrderSide.SELL,
+        time_in_force=TimeInForce.GTC,
+        stop_price=buy_price - 0.05  # stop price is 5 cents less than the buy price
+    )
+    stop_loss_order = client.submit_order(order_data=stop_loss_order_details)
+    print(f"Stop loss order placed: {stop_loss_order}")
 
-wss_client.run()  # start the WebSocket client outside the loop
+    # Start the WebSocket client
+    wss_client.subscribe_trades(trade_data_handler, "SPY")
+    wss_client.run()
+
+    time.sleep(60)  # wait for a minute before the next buy order
 
 assets = [asset for asset in client.get_all_positions()]
 positions = [(asset.symbol, asset.qty, asset.current_price) for asset in assets]

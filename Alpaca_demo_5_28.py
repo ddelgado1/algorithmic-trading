@@ -23,7 +23,7 @@ async def trade_data_handler(data):
     if current_price - buy_price >= 0.05:
         sell_order_details = MarketOrderRequest(
             symbol= "SPY",
-            qty = 40,
+            qty = 5,
             side = OrderSide.SELL,
             time_in_force = TimeInForce.DAY
         )
@@ -34,7 +34,7 @@ wss_client.subscribe_trades(trade_data_handler, "SPY")
 while True:  # loop to continuously buy and sell
     order_details = MarketOrderRequest(
         symbol= "SPY",
-        qty = 40,
+        qty = 5,
         side = OrderSide.BUY,
         time_in_force = TimeInForce.DAY
     )

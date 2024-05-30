@@ -26,7 +26,7 @@ async def trade_data_handler(data):
         print("Condition for selling met, placing sell order...")  # print a message before placing the sell order
         sell_order_details = MarketOrderRequest(
             symbol= "SPY",
-            qty = 2,
+            qty = 10,
             side = OrderSide.SELL,
             time_in_force = TimeInForce.DAY
         )
@@ -36,12 +36,10 @@ async def trade_data_handler(data):
         except Exception as e:
             print(f"Error when placing sell order: {e}")  # print any errors when placing the sell order
 
-wss_client.subscribe_trades(trade_data_handler, "SPY")
-
 while True:  # loop to continuously buy and sell
     order_details = MarketOrderRequest(
         symbol= "SPY",
-        qty = 2,
+        qty = 10,
         side = OrderSide.BUY,
         time_in_force = TimeInForce.DAY
     )
@@ -55,9 +53,11 @@ while True:  # loop to continuously buy and sell
             buy_price = float(order_status.filled_avg_price)  # convert to float
             break  # exit the loop once the buy order is filled
 
-    time.sleep(60)  # wait for a minute before the next buy order
+    # Start the WebSocket client
+    wss_client.subscribe_trades(trade_data_handler, "SPY")
+    wss_client.run()
 
-wss_client.run()  # start the WebSocket client outside the loop
+    time.sleep(60)  # wait for a minute before the next buy order
 
 assets = [asset for asset in client.get_all_positions()]
 positions = [(asset.symbol, asset.qty, asset.current_price) for asset in assets]
